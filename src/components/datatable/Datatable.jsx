@@ -16,21 +16,41 @@ const Datatable = () => {
   const [data, setData] = useState({});
 
   useEffect(() => {
-    const fetchData = async () => {
-      let list = [];
-      try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        querySnapshot.forEach((doc) => {
+    // const fetchData = async () => {
+    //   let list = [];
+    //   try {
+    //     const querySnapshot = await getDocs(collection(db, "users"));
+    //     querySnapshot.forEach((doc) => {
+    //       list.push({ id: doc.id, ...doc.data() });
+    //       console.log(doc.id, " => ", doc.data());
+    //     });
+    //     setData(list);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+    // fetchData();
+
+    // LISTEN (REALTIME)
+    const unsub = onSnapshot(
+      collection(db, "users"),
+      (snapShot) => {
+        let list = [];
+        snapShot.docs.forEach((doc) => {
           list.push({ id: doc.id, ...doc.data() });
-          console.log(doc.id, " => ", doc.data());
         });
         setData(list);
-      } catch (error) {
+      },
+      (error) => {
         console.log(error);
       }
+    );
+
+    return () => {
+      unsub();
     };
-    fetchData();
   }, []);
+
   console.log(data);
 
   const handleDelete = async (id) => {
